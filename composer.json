@@ -1,0 +1,48 @@
+{
+    "name": "aculix99/laravel-quick-static",
+    "description": "Serve static html, json and xml files without booting laravel for best performance",
+    "version": "1.0.0",
+    "keywords": [
+        "laravel",
+        "static",
+        "pages",
+        "caching",
+        "html",
+        "json",
+        "xml"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Aculix99\\LaravelQuickStatic\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "AcuLix99",
+            "email": "237075139+AcuLix99@users.noreply.github.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "symfony/http-foundation": "^7.0",
+        "illuminate/console": "^12.0"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.25",
+        "symfony/var-dumper": "^7.3"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Aculix99\\LaravelQuickStatic\\PackageServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "cs": ["./vendor/bin/pint"]
+    }
+}
