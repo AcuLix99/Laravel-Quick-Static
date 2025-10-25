@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Aculix99\LaravelQuickStatic;
 
 use Illuminate\Contracts\Container\Container;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -25,7 +26,21 @@ class Controller
     {
         $file = sha1($_SERVER['REQUEST_URI']);
         $ext = '.'.$this->getExtension($res);
-        file_put_contents($this->getPath().DIRECTORY_SEPARATOR.$file.$ext, $res->getContent());
+        $data = $res->getContent();
+        if ($ext === '.html') {
+            $data = $this->minifyHtml($data);
+        }
+        if (! $data) {
+            Log::warning('Failed to cache response', ['RequestUri' => $_SERVER['REQUEST_URI']]);
+
+            return;
+        }
+
+        file_put_contents($this->getPath().DIRECTORY_SEPARATOR.$file.$ext, $data);
+        Log::info('Successfully cached response', [
+            'RequestUri' => $_SERVER['REQUEST_URI'],
+            'file' => $file.$ext,
+        ]);
     }
 
     public function getPath(): string
@@ -47,5 +62,22 @@ class Controller
             in_array($type, ['text/xml', 'application/xml']) => 'xml',
             default => 'html',
         };
+    }
+
+    private function minifyHtml(string|false $html): string|false
+    {
+        if ($html === false) {
+            return false;
+        }
+
+        return (new \voku\helper\HtmlMin)
+            ->doRemoveComments(true)
+            ->doRemoveWhitespaceAroundTags(true)
+            ->doRemoveOmittedHtmlTags(false)
+            ->doRemoveEmptyAttributes(true)
+            ->doOptimizeAttributes(true)
+            ->doRemoveHttpPrefixFromAttributes(false)
+            ->doRemoveSpacesBetweenTags(true)
+            ->minify($html);
     }
 }
