@@ -11,6 +11,10 @@
   - [Clearing the cache](#clearing-the-cache)
 - [License](#license)
 
+\
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/aculix99/laravel-quick-static.svg?style=flat-square)](https://packagist.org/packages/aculix99/laravel-quick-static)
+[![Total Downloads](https://img.shields.io/packagist/dt/aculix99/laravel-quick-static.svg?style=flat-square)](https://packagist.org/packages/aculix99/laravel-quick-static)
+
 ## Introduction
 This package allows you to serve static html, json and xml files without booting laravel for best performance! It's inspired by [page-cache](https://github.com/JosephSilber/page-cache).
 
