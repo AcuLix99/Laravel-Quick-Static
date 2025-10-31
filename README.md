@@ -25,29 +25,9 @@ composer require aculix99/laravel-quick-static
 ```
 ### URL Rewriting
 #### Snippet
-Add this code snippet to the `public/index.php` of your laravel application right after the use statements:
+Add this line to the `public/index.php` of your laravel application right after the use statements:
 ```php
-$path = '_quick-static' . DIRECTORY_SEPARATOR . sha1($_SERVER['REQUEST_URI']);
-$file = realpath("{$path}.html");
-if ($file) {
-    header('Content-Type: text/html; charset=utf-8');
-    require $file;
-    exit();
-}
-
-$file = realpath("{$path}.json");
-if ($file) {
-    header('Content-Type: application/json; charset=utf-8');
-    require $file;
-    exit();
-}
-
-$file = realpath("{$path}.xml");
-if ($file) {
-    header('Content-Type: application/xml; charset=utf-8');
-    require $file;
-    exit();
-}
+require __DIR__ . '/../vendor/aculix99/laravel-quick-static/loader.php';
 ```
 #### Full file as reference
 Your full index.php will then look like this:
@@ -57,27 +37,7 @@ Your full index.php will then look like this:
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 
-$path = '_quick-static' . DIRECTORY_SEPARATOR . sha1($_SERVER['REQUEST_URI']);
-$file = realpath("{$path}.html");
-if ($file) {
-    header('Content-Type: text/html; charset=utf-8');
-    require $file;
-    exit();
-}
-
-$file = realpath("{$path}.json");
-if ($file) {
-    header('Content-Type: application/json; charset=utf-8');
-    require $file;
-    exit();
-}
-
-$file = realpath("{$path}.xml");
-if ($file) {
-    header('Content-Type: application/xml; charset=utf-8');
-    require $file;
-    exit();
-}
+require __DIR__ . '/../vendor/aculix99/laravel-quick-static/loader.php';
 
 define('LARAVEL_START', microtime(true));
 
@@ -94,9 +54,10 @@ require __DIR__.'/../vendor/autoload.php';
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
 $app->handleRequest(Request::capture());
+
 ```
 #### Customizations
-Feel free to adjust the snippet the way you like it. Since it's PHP rewriting, you can do your very own, performant **PHP MAGIC**. Also you can ignore cached files if query parameters are present.
+Feel free to adjust the loader within your `index.php` the way you like it. Since it's PHP rewriting, you can do your very own, performant **PHP MAGIC**. Also you can ignore cached files if query parameters are present.
 ## Usage
 ### Using the middleware
 Just add the middleware to the corresponding routes like this:
