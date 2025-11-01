@@ -1,28 +1,37 @@
 <?php
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $path = '_quick-static'.DIRECTORY_SEPARATOR.sha1(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
-    $file = realpath("{$path}.html");
-    if ($file) {
-        header('X-Static-Cache: HIT');
-        header('Content-Type: text/html; charset=utf-8');
-        require $file;
-        exit();
-    }
+declare(strict_types=1);
 
-    $file = realpath("{$path}.json");
-    if ($file) {
-        header('X-Static-Cache: HIT');
-        header('Content-Type: application/json; charset=utf-8');
-        require $file;
-        exit();
-    }
+if (! in_array($_SERVER['REQUEST_METHOD'], ['GET', 'HEAD'], true)) {
+    header('X-Static-Cache: MISS');
 
-    $file = realpath("{$path}.xml");
-    if ($file) {
-        header('X-Static-Cache: HIT');
-        header('Content-Type: application/xml; charset=utf-8');
-        require $file;
-        exit();
-    }
+    return;
 }
+
+$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$path = '_quick-static'.DIRECTORY_SEPARATOR.sha1($requestUri);
+
+foreach (['html', 'json', 'xml'] as $ext) {
+    $file = realpath("$path.$ext");
+    if (! $file) {
+        continue;
+    }
+
+    $contentType = [
+        'html' => 'text/html; charset=utf-8',
+        'json' => 'application/json; charset=utf-8',
+        'xml' => 'application/xml; charset=utf-8',
+    ][$ext];
+
+    header('X-Static-Cache: HIT');
+    header("Content-Type: $contentType");
+
+    if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
+        exit;
+    }
+
+    require $file;
+    exit;
+}
+
+header('X-Static-Cache: MISS');
