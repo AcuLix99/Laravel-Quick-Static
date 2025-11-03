@@ -13,8 +13,6 @@ class Controller
 {
     protected ?Container $container = null;
 
-    public const FOLDER_NAME = '_quick-static';
-
     public function setContainer($container): static
     {
         $this->container = $container;
@@ -24,11 +22,17 @@ class Controller
 
     public function store(Response $res): void
     {
+        if (config('quick-static.debug', false)) {
+            return;
+        }
+
         $file = sha1($_SERVER['REQUEST_URI']);
         $ext = '.'.$this->getExtension($res);
         $data = $res->getContent();
         if ($ext === '.html') {
-            $data = $this->minifyHtml($data);
+            if (config('quick-static.minify_html', true)) {
+                $data = $this->minifyHtml($data);
+            }
         }
         if (! $data) {
             Log::warning('Failed to cache response', ['RequestUri' => $_SERVER['REQUEST_URI']]);
@@ -37,15 +41,17 @@ class Controller
         }
 
         file_put_contents($this->getPath().DIRECTORY_SEPARATOR.$file.$ext, $data);
-        Log::info('Successfully cached response', [
-            'RequestUri' => $_SERVER['REQUEST_URI'],
-            'file' => $file.$ext,
-        ]);
+        if (config('quick-static.log', true)) {
+            Log::info('Successfully cached response', [
+                'RequestUri' => $_SERVER['REQUEST_URI'],
+                'file' => $file.$ext,
+            ]);
+        }
     }
 
     public function getPath(): string
     {
-        $path = $this->container->make('path.public').DIRECTORY_SEPARATOR.self::FOLDER_NAME;
+        $path = config('quick-static.cache_folder');
         if (! is_dir($path)) {
             mkdir($path, 0775);
         }

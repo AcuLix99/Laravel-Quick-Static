@@ -2,14 +2,27 @@
 
 declare(strict_types=1);
 
+$rootPath = defined('QUICK_STATIC_ROOT') ? QUICK_STATIC_ROOT : __DIR__;
+$configFile = $rootPath.'/../bootstrap/cache/quick-static.php';
+if (! file_exists($configFile)) {
+    return;
+}
+$config = require $configFile;
+
+if ($config['debug'] ?? false) {
+    return;
+}
+
 if (! in_array($_SERVER['REQUEST_METHOD'], ['GET', 'HEAD'], true)) {
-    header('X-Static-Cache: MISS');
+    if ($config['send_headers'] ?? true) {
+        header('X-Static-Cache: MISS');
+    }
 
     return;
 }
 
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$path = '_quick-static'.DIRECTORY_SEPARATOR.sha1($requestUri);
+$path = $config['cache_folder'].DIRECTORY_SEPARATOR.sha1($requestUri);
 
 foreach (['html', 'json', 'xml'] as $ext) {
     $file = realpath("$path.$ext");
@@ -23,7 +36,9 @@ foreach (['html', 'json', 'xml'] as $ext) {
         'xml' => 'application/xml; charset=utf-8',
     ][$ext];
 
-    header('X-Static-Cache: HIT');
+    if ($config['send_headers'] ?? true) {
+        header('X-Static-Cache: HIT');
+    }
     header("Content-Type: $contentType");
 
     if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
@@ -34,4 +49,6 @@ foreach (['html', 'json', 'xml'] as $ext) {
     exit;
 }
 
-header('X-Static-Cache: MISS');
+if ($config['send_headers'] ?? true) {
+    header('X-Static-Cache: MISS');
+}
