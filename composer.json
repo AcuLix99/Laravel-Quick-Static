@@ -1,7 +1,7 @@
 {
     "name": "aculix99/laravel-quick-static",
     "description": "Serve static html, json and xml files without booting laravel for best performance",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "keywords": [
         "laravel",
         "static",
